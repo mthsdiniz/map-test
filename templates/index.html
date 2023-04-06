@@ -68,6 +68,59 @@
         #file-dropdown {
             text-align: center;
         }
+
+        /* Style the container for the checkboxes */
+        #checkboxList {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+        }
+
+        /* Style the individual checkbox items */
+        #checkboxList div {
+            margin-bottom: 5px;
+        }
+
+        /* Style the label for better text alignment */
+        #checkboxList label {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Style the checkbox with a custom appearance */
+        #checkboxList input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 3px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+        }
+
+        /* Style the checkbox when checked */
+        #checkboxList input[type="checkbox"]:checked {
+            background-color: #007bff;
+            border-color: #007bff;
+            position: relative;
+        }
+
+        /* Add a checkmark icon when the checkbox is checked */
+        #checkboxList input[type="checkbox"]:checked::after {
+            content: "";
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            transform: rotate(45deg);
+        }
     </style>
 
 </head>
@@ -325,7 +378,7 @@
                             listItem.appendChild(label);
                             checkboxList.appendChild(listItem);
                         });
-                        }
+                    }
 
                     async function addLayer(file) {
                         const fileType = file.path.split('.').pop().toLowerCase();
@@ -370,10 +423,10 @@
                     }
 
                     document.getElementById("selectAll").addEventListener("change", function (event) {
-                    const checkboxes = document.getElementsByName("files");
-                    checkboxes.forEach((checkbox) => {
-                        checkbox.checked = event.target.checked;
-                    });
+                        const checkboxes = document.getElementsByName("files");
+                        checkboxes.forEach((checkbox) => {
+                            checkbox.checked = event.target.checked;
+                        });
                     });
 
 
