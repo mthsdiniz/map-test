@@ -14,24 +14,78 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+
+        .container {
+            max-width: 600px;
+        }
+
+        .form-control {
+            border-radius: 50px;
+            padding-left: 20px;
+            padding-right: 20px;
+            font-size: 16px;
+            border-color: #b0b0b0;
+        }
+
+        .btn {
+            border-radius: 50px;
+            font-size: 16px;
+            border-color: #b0b0b0;
+        }
+
+        .form-control:focus {
+            border-color: #808080;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .btn {
+            background-color: transparent;
+            color: #808080;
+            font-weight: bold;
+        }
+
+        .btn:hover,
+        .btn:focus {
+            background-color: #808080;
+            color: #ffffff;
+        }
+
+        #file-dropdown {
+            text-align: center;
+        }
+    </style>
+
 </head>
 
 <body style="margin:0; padding:0;">
     <div class="container mt-3">
-        <div class="row">
-            <div class="col-md-3">
+        <div class="row mb-2">
+            <div class="col-md-12">
                 <input type="text" class="form-control" id="username" placeholder="Username">
             </div>
-            <div class="col-md-3">
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-12">
                 <input type="text" class="form-control" id="repo-name" placeholder="Repo name">
             </div>
-            <div class="col-md-3">
+        </div>
+        <div class="row mb-2">
+            <div class="col-md-12">
                 <input type="text" class="form-control" id="access-token" placeholder="GitHub Access Token">
             </div>
-            <div class="col-md-3">
-                <button class="btn btn-primary" id="fetch-files-btn">Fetch Files</button>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <button class="btn btn-primary btn-block" id="fetch-files-btn">Fetch Files</button>
             </div>
-            <div class="col-md-12 mt-3">
+        </div>
+        <div class="row">
+            <div class="col-md-12">
                 <select class="form-control" id="file-dropdown" style="width: 100%;">
                     <option value="" disabled selected>Select a file</option>
                 </select>
