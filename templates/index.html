@@ -13,6 +13,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.2.0/dist/Control.Geocoder.css" />
+    <script src="https://unpkg.com/leaflet-control-geocoder@2.2.0/dist/Control.Geocoder.js"></script>
+
 
     <style>
         body {
@@ -182,6 +185,40 @@
             const layer = map._layers[layerId];
             map.fitBounds(layer.getBounds());
         });
+
+        function populateDropdown(files) {
+            const searchControl = new L.Control.Geocoder({
+                geocoder: new L.Control.Geocoder.Custom(files.map((file) => {
+                return {
+                    name: file.path,
+                    file: file
+                };
+                })),
+                showResultIcons: false,
+                placeholder: 'Search for a file...',
+                errorMessage: 'File not found',
+            });
+
+            searchControl.addTo(map);
+            searchControl.markGeocode = function (result) {
+                map.fitBounds(result.file.layer.getBounds());
+            };
+        }
+
+        /*
+        .then((data) => {
+        if (fileType === 'kml') {
+            const kmlBlob = new Blob([data], { type: 'application/vnd.google-earth.kml+xml' });
+            const kmlLayer = omnivore.kml.parse(kmlBlob);
+            kmlLayer.addTo(map);
+            file.layer = kmlLayer;
+        } else if (fileType === 'geojson') {
+            const geojsonLayer = L.geoJSON(JSON.parse(data));
+            geojsonLayer.addTo(map);
+            file.layer = geojsonLayer;
+        }
+        })
+        // ...*/
     </script>
 </body>
 
