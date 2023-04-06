@@ -187,13 +187,28 @@
         });
 
         function populateDropdown(files) {
+            const CustomGeocoder = L.Control.Geocoder.extend({
+                initialize: function (fileOptions) {
+                this.fileOptions = fileOptions;
+                },
+                geocode: function (query, cb, context) {
+                const results = this.fileOptions.filter((fileOption) =>
+                    fileOption.name.toLowerCase().includes(query.toLowerCase())
+                );
+                cb.call(context, results);
+                },
+                reverse: function () {},
+            });
+
             const searchControl = new L.Control.Geocoder({
-                geocoder: new L.Control.Geocoder.Custom(files.map((file) => {
-                return {
+                geocoder: new CustomGeocoder(
+                files.map((file) => {
+                    return {
                     name: file.path,
-                    file: file
-                };
-                })),
+                    file: file,
+                    };
+                })
+                ),
                 showResultIcons: false,
                 placeholder: 'Search for a file...',
                 errorMessage: 'File not found',
@@ -204,6 +219,7 @@
                 map.fitBounds(result.file.layer.getBounds());
             };
         }
+
 
         /*
         .then((data) => {
