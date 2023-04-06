@@ -128,47 +128,46 @@
             const repoName = document.getElementById('repo-name').value;
             const accessToken = document.getElementById('access-token').value;
 
-            if (!username || !repoName || !accessToken) {
-                alert('Please fill in all fields');
-                return;
-            }
+            const headers = {
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `token ${accessToken}`
+            };
 
-            const headers = new Headers();
-            headers.append('Authorization', 'token ' + accessToken);
-
-            const repoUrl = `https://api.github.com/repos/${username}/${repoName}/contents/`;
+            const repoUrl = `/api/proxy`;
 
             // Add KML and GeoJSON files to the map
             fetchGitHubFiles(repoUrl, headers).then(files => {
                 files.forEach(file => {
-                    fetch(file.download_url)
-                        .then(response => response.text())
-                        .then(data => {
-                            const fileType = file.name.split('.').pop().toLowerCase();
-                            if (fileType === 'kml') {
-                                const kmlLayer = omnivore.kml.parse(data);
-                                kmlLayer.on('add', (e) => {
-                                    const option = new Option(file.name, kmlLayer._leaflet_id);
-                                    $("#file-dropdown").append(option).trigger('change');
-                                });
-                                kmlLayer.eachLayer((layer) => {
-                                    layer.bindPopup(`Filename: ${file.name}<br>URL: ${file.html_url}`);
-                                });
-                                kmlLayer.addTo(map);
-                            } else if (fileType === 'geojson') {
-                                const geojsonLayer = L.geoJSON(JSON.parse(data));
-                                geojsonLayer.on('add', (e) => {
-                                    const option = new Option(file.name, geojsonLayer._leaflet_id);
-                                    $("#file-dropdown").append(option).trigger('change');
-                                });
-                                geojsonLayer.eachLayer((layer) => {
-                                    layer.bindPopup(`Filename: ${file.name}<br>URL: ${file.html_url}`);
-                                });
-                                geojsonLayer.addTo(map);
-                            }
-                        });
+                    const fileType = file.name.split('.').pop().toLowerCase();
+
+                    fetchGitHubFiles(`/api/proxy`, {
+                        'Authorization': `token ${accessToken}`
+                    }, file.url).then(data => {
+                        if (fileType === 'kml') {
+                            const kmlLayer = omnivore.kml.parse(data);
+                            kmlLayer.addTo(map);
+                        } else if (fileType === 'geojson') {
+                            const geojsonLayer = L.geoJSON(JSON.parse(data));
+                            geojsonLayer.addTo(map);
+                        }
+                    });
                 });
             });
+        }
+
+        function fetchGitHubFiles(url, headers, fileUrl = '') {
+            const payload = {
+                url: fileUrl || `https://api.github.com/repos/${username}/${repoName}/contents/path-to-files`,
+                headers: headers
+            };
+
+            return fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            }).then(response => response.json());
         }
 
         // Attach event listener to the button
