@@ -16,6 +16,13 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder@2.2.0/dist/Control.Geocoder.css" />
     <script src="https://unpkg.com/leaflet-control-geocoder@2.2.0/dist/Control.Geocoder.js"></script>
 
+    <!-- new -->
+    <!-- Add these lines to your HTML file -->
+    <script src="https://unpkg.com/leaflet-geotiff"></script>
+    <script src="https://unpkg.com/leaflet-geotiff-2"></script>
+    <script src="https://unpkg.com/plotty"></script>
+
+
 
     <style>
         body {
@@ -87,6 +94,12 @@
                 <button class="btn btn-primary btn-block" id="fetch-files-btn">Fetch Files</button>
             </div>
         </div>
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div id="file-panel" class="mt-3"></div>
+            </div>
+        </div>
+        
         <div class="row">
             <div class="col-md-12">
                 <select class="form-control" id="file-dropdown" style="width: 100%;">
@@ -158,6 +171,8 @@
             });
         }
 
+        populateCheckboxes(files);
+
         function fetchGitHubFiles(url, headers, fileUrl = '') {
             const payload = {
                 url: fileUrl || `https://api.github.com/repos/${username}/${repoName}/contents/path-to-files`,
@@ -189,25 +204,25 @@
         function populateDropdown(files) {
             const CustomGeocoder = L.Control.Geocoder.extend({
                 initialize: function (fileOptions) {
-                this.fileOptions = fileOptions;
+                    this.fileOptions = fileOptions;
                 },
                 geocode: function (query, cb, context) {
-                const results = this.fileOptions.filter((fileOption) =>
-                    fileOption.name.toLowerCase().includes(query.toLowerCase())
-                );
-                cb.call(context, results);
+                    const results = this.fileOptions.filter((fileOption) =>
+                        fileOption.name.toLowerCase().includes(query.toLowerCase())
+                    );
+                    cb.call(context, results);
                 },
-                reverse: function () {},
+                reverse: function () { },
             });
 
             const searchControl = new L.Control.Geocoder({
                 geocoder: new CustomGeocoder(
-                files.map((file) => {
-                    return {
-                    name: file.path,
-                    file: file,
-                    };
-                })
+                    files.map((file) => {
+                        return {
+                            name: file.path,
+                            file: file,
+                        };
+                    })
                 ),
                 showResultIcons: false,
                 placeholder: 'Search for a file...',
@@ -221,20 +236,65 @@
         }
 
 
-        /*
-        .then((data) => {
-        if (fileType === 'kml') {
-            const kmlBlob = new Blob([data], { type: 'application/vnd.google-earth.kml+xml' });
-            const kmlLayer = omnivore.kml.parse(kmlBlob);
-            kmlLayer.addTo(map);
-            file.layer = kmlLayer;
-        } else if (fileType === 'geojson') {
-            const geojsonLayer = L.geoJSON(JSON.parse(data));
-            geojsonLayer.addTo(map);
-            file.layer = geojsonLayer;
-        }
+        const url_to_geotiff_file = "your-geotiff-url";
+
+        fetch("/fetch_geotiff", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ url: url_to_geotiff_file }),
         })
-        // ...*/
+            .then((response) => response.arrayBuffer())
+            .then((arrayBuffer) => {
+                const geotiff = GeoTIFF.parse(arrayBuffer);
+                const image = geotiff.getImage();
+                const rasters = image.readRasters();
+
+                const plottyRenderer = new L.LeafletGeotiff.Plotty({
+                    colorScale: "viridis",
+                    displayMin: 0,
+                    displayMax: 255,
+                });
+
+                const geotiffLayer = new L.leafletGeotiff(image, rasters, {
+                    renderer: plottyRenderer,
+                    opacity: 0.7,
+                }).addTo(map);
+
+                map.fitBounds(geotiffLayer.getBounds());
+            });
+
+        function populateCheckboxes(files) {
+            const panel = document.getElementById('file-panel');
+            panel.innerHTML = '';
+
+            files.forEach((file) => {
+                const checkBox = document.createElement('input');
+                checkBox.type = 'checkbox';
+                checkBox.id = file.path;
+                checkBox.name = file.path;
+
+                const label = document.createElement('label');
+                label.htmlFor = file.path;
+                label.appendChild(document.createTextNode(file.path));
+
+                checkBox.addEventListener('change', async () => {
+                    if (checkBox.checked) {
+                        await addLayer(file);
+                    } else {
+                        removeLayer(file);
+                    }
+                });
+
+                const div = document.createElement('div');
+                div.appendChild(checkBox);
+                div.appendChild(label);
+                panel.appendChild(div);
+            });
+        }
+
+
     </script>
 </body>
 
