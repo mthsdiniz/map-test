@@ -121,6 +121,55 @@
             left: 6px;
             transform: rotate(45deg);
         }
+
+        /* Style the container for the "Select All" checkbox */
+        #selectAllContainer {
+            background-color: white;
+            border-radius: 5px;
+            padding: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            margin-bottom: 10px;
+        }
+
+        /* Style the "Select All" label for better text alignment */
+        #selectAllContainer label {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        /* Style the "Select All" checkbox with a custom appearance */
+        #selectAllContainer input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            border: 1px solid #ccc;
+            background-color: white;
+            border-radius: 3px;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+        }
+
+        /* Style the "Select All" checkbox when checked */
+        #selectAllContainer input[type="checkbox"]:checked {
+            background-color: #007bff;
+            border-color: #007bff;
+            position: relative;
+        }
+
+        /* Add a checkmark icon when the "Select All" checkbox is checked */
+        #selectAllContainer input[type="checkbox"]:checked::after {
+            content: "";
+            width: 5px;
+            height: 9px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            transform: rotate(45deg);
+        }
     </style>
 
 </head>
@@ -157,10 +206,13 @@
 
         <div class="row">
             <div class="col-md-12">
-                <label>
-                    <input type="checkbox" id="selectAll">
-                    Select All
-                </label>
+                <!-- Add a container for the "Select All" checkbox -->
+                <div id="selectAllContainer">
+                    <label>
+                        <input type="checkbox" id="selectAll">
+                        Select All
+                    </label>
+                </div>
                 <!-- Add a scrollable list container for checkboxes -->
                 <div id="checkboxList"
                     style="max-height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 8px;">
