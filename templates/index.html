@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Flask Leaflet App</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-omnivore/0.3.4/leaflet-omnivore.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+</head>
+
+<body style="margin:0; padding:0;">
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="username" placeholder="Username">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="repo-name" placeholder="Repo name">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="access-token" placeholder="GitHub Access Token">
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary" id="fetch-files-btn">Fetch Files</button>
+            </div>
+            <div class="col-md-12 mt-3">
+                <select class="form-control" id="file-dropdown" style="width: 100%;">
+                    <option value="" disabled selected>Select a file</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div id="map" style="width: 100%; height: 100vh;"></div>
+    <script>
+        // Fetch KML and GeoJSON files from GitHub recursively
+        async function fetchGitHubFiles(url, headers) {
+            const response = await fetch(url, { headers });
+            const data = await response.json();
+            let files = [];
+
+            for (const item of data) {
+                if (item.type === 'dir') {
+                    const subdirFiles = await fetchGitHubFiles(item.url);
+                    files = files.concat(subdirFiles);
+                } else if (item.name.endsWith('.kml') || item.name.endsWith('.geojson')) {
+                    files.push(item);
+                }
+            }
+            console.log(files)
+            return files;
+        }
+
+        // Initialize the Leaflet map
+        const map = L.map('map').setView([0, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Replace 'username', 'repo-name', and 'path-to-files' with the appropriate values
+        const repoUrl = 'https://api.github.com/repos/username/repo-name/contents/path-to-files';
+
+        function fetchFiles() {
+            const username = document.getElementById('username').value;
+            const repoName = document.getElementById('repo-name').value;
+            const accessToken = document.getElementById('access-token').value;
+
+            if (!username || !repoName || !accessToken) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            const headers = new Headers();
+            headers.append('Authorization', 'token ' + accessToken);
+
+            const repoUrl = `https://api.github.com/repos/${username}/${repoName}/contents/`;
+
+            // Add KML and GeoJSON files to the map
+            fetchGitHubFiles(repoUrl, headers).then(files => {
+                files.forEach(file => {
+                    fetch(file.download_url)
+                        .then(response => response.text())
+                        .then(data => {
+                            const fileType = file.name.split('.').pop().toLowerCase();
+                            if (fileType === 'kml') {
+                                const kmlLayer = omnivore.kml.parse(data);
+                                kmlLayer.on('add', (e) => {
+                                    const option = new Option(file.name, kmlLayer._leaflet_id);
+                                    $("#file-dropdown").append(option).trigger('change');
+                                });
+                                kmlLayer.eachLayer((layer) => {
+                                    layer.bindPopup(`Filename: ${file.name}<br>URL: ${file.html_url}`);
+                                });
+                                kmlLayer.addTo(map);
+                            } else if (fileType === 'geojson') {
+                                const geojsonLayer = L.geoJSON(JSON.parse(data));
+                                geojsonLayer.on('add', (e) => {
+                                    const option = new Option(file.name, geojsonLayer._leaflet_id);
+                                    $("#file-dropdown").append(option).trigger('change');
+                                });
+                                geojsonLayer.eachLayer((layer) => {
+                                    layer.bindPopup(`Filename: ${file.name}<br>URL: ${file.html_url}`);
+                                });
+                                geojsonLayer.addTo(map);
+                            }
+                        });
+                });
+            });
+        }
+
+        // Attach event listener to the button
+        document.getElementById('fetch-files-btn').addEventListener('click', fetchFiles);
+
+        // Initialize the Select2 dropdown
+        $("#file-dropdown").select2();
+
+        // Event listener for when a file is selected
+        $("#file-dropdown").on("select2:select", function (e) {
+            const layerId = e.params.data.id;
+            const layer = map._layers[layerId];
+            map.fitBounds(layer.getBounds());
+        });
+    </script>
+</body>
+
+</html>
