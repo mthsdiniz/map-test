@@ -236,6 +236,12 @@
         }
 
 
+        fetch(url_to_geotiff_file)
+          .then(response => response.arrayBuffer())
+          .then(arrayBuffer => {
+            parseGeoraster(arrayBuffer).then(georaster => {
+              console.log("georaster:", georaster);
+
         const url_to_geotiff_file = "your-geotiff-url";
 
         fetch("/fetch_geotiff", {
