@@ -20,49 +20,60 @@
       z-index: 999;
     }
     .modal-box {
-      background-color: white;
+      background-color: #0A0E14;
       padding: 20px;
       border-radius: 5px;
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
       max-width: 80%;
       max-height: 80%;
       overflow: auto;
+      position: relative;
     }
-    .modal-box label {
-      display: block;
-      margin-bottom: 10px;
+    .modal-box h2 {
+      margin-top: 0;
+      font-size: 24px;
+      color: white;
+      text-align: center;
+      font-family: 'Helvetica Neue', sans-serif;
+      letter-spacing: 2px;
     }
-    .modal-box input[type="text"] {
+    .modal-box textarea {
       display: block;
       width: 100%;
-      height: 200px;
-      margin-bottom: 10px;
-      padding: 5px;
+      height: 300px;
+      margin-top: 20px;
+      padding: 10px;
       font-size: 16px;
-      border: 1px solid #ccc;
+      color: black;
+      border: none;
+      background-color: #E5E5E5;
       border-radius: 5px;
-      resize: vertical;
+      resize: none;
     }
     .modal-box button {
-      margin-top: 10px;
-      margin-right: 10px;
-      padding: 5px 10px;
+      display: block;
+      margin-top: 20px;
+      padding: 10px;
+      width: 100%;
       font-size: 16px;
-      background-color: #4CAF50;
-      color: white;
+      font-weight: bold;
+      color: #333333;
+      background-color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
     .modal-box button:hover {
-      background-color: #3E8E41;
+      background-color: #F5F5F5;
     }
-
-    .modal-box input[type="text"] {
-  display: block;
-  width: 100%;
-  height: 200
-
+    .modal-box .close-button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      font-size: 24px;
+      color: white;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -72,10 +83,10 @@
   </div>
   <div class="modal-overlay" id="modal-overlay">
     <div class="modal-box">
-      <label for="url-input">Enter URLs (comma-separated):</label>
+      <h2>Enter URLs</h2>
       <textarea id="url-input" rows="10"></textarea>
       <button id="submit-button">Submit</button>
-      <button id="cancel-button">Cancel</button>
+      <span class="close-button">&times;</span>
     </div>
   </div>
   <script src="app.js"></script>
